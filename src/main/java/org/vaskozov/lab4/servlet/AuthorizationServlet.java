@@ -1,7 +1,6 @@
 package org.vaskozov.lab4.servlet;
 
 import jakarta.ejb.EJB;
-import jakarta.persistence.Transient;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,10 +13,10 @@ import org.vaskozov.lab4.service.AuthorizationInterface;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/auth", "/register"})
+@WebServlet(urlPatterns = {"/auth", "/register"}, asyncSupported = true)
 public class AuthorizationServlet extends HttpServlet {
     @EJB(name = "java:global/lab4/AuthorizationService")
-    private AuthorizationInterface authorizationService;
+    private transient AuthorizationInterface authorizationService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -35,9 +34,6 @@ public class AuthorizationServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-
-        response.setHeader("Content-Type", "text/plain");
-        response.setHeader("Access-Control-Allow-Origin", "*");
 
         String path = request.getServletPath();
 

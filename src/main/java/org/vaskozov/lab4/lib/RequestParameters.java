@@ -1,4 +1,14 @@
 package org.vaskozov.lab4.lib;
 
-public record RequestParameters(double x, double y, double r) {
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+@AllArgsConstructor
+public class RequestParameters {
+    private double x;
+    private double y;
+    private double r;
 }

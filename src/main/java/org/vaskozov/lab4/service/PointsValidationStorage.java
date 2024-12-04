@@ -3,6 +3,7 @@ package org.vaskozov.lab4.service;
 import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.vaskozov.lab4.bean.RequestResults;
 import org.vaskozov.lab4.bean.UserData;
@@ -32,6 +33,17 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
 
         query.setParameter("userId", getUserIdByLogin(login));
         return query.getResultList();
+    }
+
+    @Override
+    public boolean removeAll(String login) {
+        Query query = entityManager.createQuery(
+                "DELETE RequestResults u WHERE u.userId = :userId");
+
+        query.setParameter("userId", getUserIdByLogin(login));
+        query.executeUpdate();
+
+        return true;
     }
 
     private long getUserIdByLogin(String login) {

@@ -28,17 +28,22 @@ public class AuthorizationService implements AuthorizationInterface {
 
     @Override
     public boolean register(Login login, Password password) {
-        try {
-            UserData user = new UserData();
+        TypedQuery<UserData> query = entityManager.createQuery(
+                "SELECT u FROM UserData u WHERE u.login = :login",
+                UserData.class
+        );
 
-            user.setLogin(login.toString());
-            user.setPassword(password.getHash());
+        query.setParameter("login", login.toString());
 
-            entityManager.persist(user);
-
-            return true;
-        } catch (Exception e) {
+        if (!query.getResultList().isEmpty()) {
             return false;
         }
+
+        UserData user = new UserData();
+        user.setLogin(login.toString());
+        user.setPassword(password.getHash());
+        entityManager.persist(user);
+
+        return true;
     }
 }

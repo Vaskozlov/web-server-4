@@ -35,6 +35,8 @@ public class AreaCheckServlet extends HttpServlet {
         final long executionBeginNs = System.nanoTime();
         final var requestParameters = getParametersFromRequest(request);
 
+        response.setContentType("application/json");
+
         if (requestParameters.isError()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             gson.toJson(requestParameters.getError(), response.getWriter());
@@ -46,9 +48,8 @@ public class AreaCheckServlet extends HttpServlet {
                 requestParameters.getValue()
         );
 
-        validationStorage.save(request.getParameter("login"), responseResult);
         response.setStatus(200 + (responseResult.isInArea() ? 0 : 1));
-
+        validationStorage.save(request.getParameter("login"), responseResult);
         gson.toJson(responseResult, response.getWriter());
     }
 
@@ -60,21 +61,19 @@ public class AreaCheckServlet extends HttpServlet {
         );
     }
 
-    private RequestResults formResponseResult(long executionBegin, RequestParameters transformedData) {
+    private RequestResults formResponseResult(long executionBegin, RequestParameters requestParameters) {
         final boolean isInArea = inAreaChecker.check(
-                transformedData.x(),
-                transformedData.y(),
-                transformedData.r()
+                requestParameters.x(),
+                requestParameters.y(),
+                requestParameters.r()
         );
 
-        RequestResults result = new RequestResults();
-
-        result.setX(transformedData.x());
-        result.setY(transformedData.y());
-        result.setR(transformedData.r());
-        result.setInArea(isInArea);
-        result.setExecutionTimeNs(System.nanoTime() - executionBegin);
-
-        return result;
+        return RequestResults.builder()
+                .x(requestParameters.x())
+                .y(requestParameters.y())
+                .r(requestParameters.r())
+                .inArea(isInArea)
+                .executionTimeNs(System.nanoTime() - executionBegin)
+                .build();
     }
 }

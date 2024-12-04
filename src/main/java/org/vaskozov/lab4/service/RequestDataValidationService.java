@@ -12,10 +12,10 @@ import java.util.Arrays;
 public class RequestDataValidationService {
     private static final double DOUBLE_COMPARISON_ERROR = 1e-9;
 
-    private static final String availableRValuesAsString = "1.0, 2.0, 3.0, 4.0";
+    private static final String AVAILABLE_R_VALUES_AS_STRING = "1.0, 2.0, 3.0, 4.0";
 
     @Getter
-    private static final double[] availableRValues = Arrays.stream(availableRValuesAsString.split(", "))
+    private static final double[] availableRValues = Arrays.stream(AVAILABLE_R_VALUES_AS_STRING.split(", "))
             .mapToDouble(Double::parseDouble)
             .toArray();
 
@@ -62,19 +62,21 @@ public class RequestDataValidationService {
             return Result.error(rResult.getError());
         }
 
-        final double xValue = xResult.getValue();
-        final double yValue = yResult.getValue();
         final double rValue = rResult.getValue();
+
+        var requestParametersBuilder = RequestParameters.builder()
+                .x(xResult.getValue())
+                .y(yResult.getValue());
 
         for (double rVal : availableRValues) {
             if (Math.abs(rValue - rVal) <= DOUBLE_COMPARISON_ERROR) {
-                return Result.success(new RequestParameters(xValue, yValue, rValue));
+                return Result.success(requestParametersBuilder.r(rVal).build());
             }
         }
 
         return Result.error(new RequestValidationError(
                 "r",
-                "r must be in [%s]".formatted(availableRValuesAsString)
+                "r must be in [%s]".formatted(AVAILABLE_R_VALUES_AS_STRING)
         ));
     }
 }

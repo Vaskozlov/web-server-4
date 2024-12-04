@@ -10,18 +10,20 @@ import org.vaskozov.lab4.service.AuthorizationInterface;
 
 import java.io.IOException;
 
-@WebFilter(urlPatterns = {"/check", "/get_validations_results"})
+@WebFilter(urlPatterns = {"/check", "/validations_results"}, asyncSupported = true)
 public class AuthorizationFilter implements Filter {
     @EJB(name = "java:global/lab4/AuthorizationService")
     private AuthorizationInterface authorizationService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+
         final String loginStr = request.getParameter("login");
         final String passwordStr = request.getParameter("password");
 
         if (loginStr == null || passwordStr == null) {
-            unauthorizedError((HttpServletResponse) response);
+            unauthorizedError(httpResponse);
             return;
         }
 
@@ -29,13 +31,13 @@ public class AuthorizationFilter implements Filter {
         final var password = Password.of(passwordStr);
 
         if (login.isError() || password.isError()) {
-            unauthorizedError((HttpServletResponse) response);
+            unauthorizedError(httpResponse);
             return;
         }
 
         if (!authorizationService.authorize(login.getValue(), password.getValue())) {
             response.getWriter().println("Invalid login or password");
-            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 

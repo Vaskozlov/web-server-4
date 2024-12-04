@@ -3,7 +3,7 @@ package org.vaskozov.lab4.lib;
 import com.google.common.hash.Hashing;
 
 public class Password {
-    private static final String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+    private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
     private final String password;
 
     private Password(String password) {
@@ -16,7 +16,12 @@ public class Password {
     }
 
     public String getHash() {
-        return Hashing.sha384().hashString(password, java.nio.charset.StandardCharsets.UTF_8).toString();
+        return Hashing.sha384()
+                .hashString(
+                        "1492@@#a!" + password,
+                        java.nio.charset.StandardCharsets.UTF_8
+                )
+                .toString();
     }
 
     public static Result<Password, AuthorizationInfoError> of(String login) {
@@ -24,7 +29,7 @@ public class Password {
             return Result.error(AuthorizationInfoError.TOO_SHORT);
         }
 
-        if (!login.matches(passwordRegex)) {
+        if (!login.matches(PASSWORD_REGEX)) {
             return Result.error(AuthorizationInfoError.INVALID_CHARACTER);
         }
 

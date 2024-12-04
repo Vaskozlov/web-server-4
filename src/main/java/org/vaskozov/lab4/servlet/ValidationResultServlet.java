@@ -9,15 +9,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.vaskozov.lab4.service.PointsValidationStorageInterface;
 
-@WebServlet(urlPatterns = {"/get_validations_results"}, asyncSupported = true)
-public class GetValidationsResultsServlet extends HttpServlet {
+import java.io.IOException;
+
+@WebServlet(urlPatterns = {"/validations_results"}, asyncSupported = true)
+public class ValidationResultServlet extends HttpServlet {
     private static final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     @EJB(name = "java:global/lab4/PointsValidationStorage")
     private transient PointsValidationStorageInterface validationStorage;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final var login = request.getParameter("login");
         final var results = validationStorage.getAllValidations(login);
 
@@ -26,12 +28,16 @@ public class GetValidationsResultsServlet extends HttpServlet {
             return;
         }
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json");
+        gson.toJson(results, response.getWriter());
+    }
 
-        try {
-            gson.toJson(results, response.getWriter());
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        final var login = request.getParameter("login");
+        validationStorage.removeAll(login);
+
+        response.setContentType("text/plain;charset=UTF-8");
+        response.getWriter().write("All results for user " + login + " have been removed");
     }
 }

@@ -8,4 +8,6 @@ public interface PointsValidationStorageInterface {
     boolean save(String login, RequestResults pointCheckResult);
 
     List<RequestResults> getAllValidations(String login);
+
+    boolean removeAll(String login);
 }

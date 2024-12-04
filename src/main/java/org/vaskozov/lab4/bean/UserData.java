@@ -2,7 +2,6 @@ package org.vaskozov.lab4.bean;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.io.Serializable;
 
 @Entity
@@ -18,9 +17,4 @@ public class UserData implements Serializable {
 
     @Column(name = "password")
     private String password;
-
-    public UserData() {
-        this.login = "";
-        this.password = "";
-    }
 }

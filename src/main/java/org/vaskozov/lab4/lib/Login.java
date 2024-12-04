@@ -1,7 +1,7 @@
 package org.vaskozov.lab4.lib;
 
 public class Login {
-    private static final String loginRegex = "^[a-zA-Z0-9]+$";
+    private static final String LOGIN_REGEX = "^[a-zA-Z0-9]+$";
 
     private final String login;
 
@@ -19,7 +19,7 @@ public class Login {
             return Result.error(AuthorizationInfoError.TOO_SHORT);
         }
 
-        if (!login.matches(loginRegex)) {
+        if (!login.matches(LOGIN_REGEX)) {
             return Result.error(AuthorizationInfoError.INVALID_CHARACTER);
         }
 
