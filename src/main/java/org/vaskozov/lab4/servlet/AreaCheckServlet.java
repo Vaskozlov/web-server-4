@@ -63,15 +63,15 @@ public class AreaCheckServlet extends HttpServlet {
 
     private RequestResults formResponseResult(long executionBegin, RequestParameters requestParameters) {
         final boolean isInArea = inAreaChecker.check(
-                requestParameters.x(),
-                requestParameters.y(),
-                requestParameters.r()
+                requestParameters.getX(),
+                requestParameters.getY(),
+                requestParameters.getR()
         );
 
         return RequestResults.builder()
-                .x(requestParameters.x())
-                .y(requestParameters.y())
-                .r(requestParameters.r())
+                .x(requestParameters.getX())
+                .y(requestParameters.getY())
+                .r(requestParameters.getR())
                 .inArea(isInArea)
                 .executionTimeNs(System.nanoTime() - executionBegin)
                 .build();
