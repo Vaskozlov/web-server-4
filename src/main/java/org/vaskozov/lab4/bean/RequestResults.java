@@ -22,6 +22,12 @@ public class RequestResults implements Serializable {
         this.executionTimeNs = executionTimeNs;
     }
 
+    @Builder(builderMethodName = "builderWithUserId", builderClassName = "BuilderWithUserId")
+    RequestResults(long userId, double x, double y, double r, boolean inArea, long executionTimeNs) {
+        this(x, y, r, inArea, executionTimeNs);
+        this.userId = userId;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

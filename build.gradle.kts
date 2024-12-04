@@ -18,6 +18,7 @@ val hibernateVersion = "6.6.3.Final"
 val postgresqlVersion = "42.7.4"
 val lombokVersion = "1.18.34"
 val guavaVersion = "33.3.1-jre"
+val jjwtVersion = "0.12.6"
 
 dependencies {
     implementation("com.google.code.gson:gson:${gsonVersion}")
@@ -29,4 +30,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
     implementation("com.google.guava:guava:${guavaVersion}")
     implementation("jakarta.platform:jakarta.jakartaee-api:${jakartaApiVersion}")
+    implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
 }

@@ -20,10 +20,10 @@ public class AuthorizationService implements AuthorizationInterface {
                 UserData.class
         );
 
-        query.setParameter("login", login.toString());
-        query.setParameter("password", password.getHash());
-
-        return !query.getResultList().isEmpty();
+        return !query.setParameter("login", login.toString())
+                .setParameter("password", password.getHash())
+                .getResultList()
+                .isEmpty();
     }
 
     @Override
@@ -33,17 +33,20 @@ public class AuthorizationService implements AuthorizationInterface {
                 UserData.class
         );
 
-        query.setParameter("login", login.toString());
+        boolean hasUser = !query.setParameter("login", login.toString())
+                .getResultList()
+                .isEmpty();
 
-        if (!query.getResultList().isEmpty()) {
+        if (hasUser) {
             return false;
         }
 
-        UserData user = new UserData();
-        user.setLogin(login.toString());
-        user.setPassword(password.getHash());
-        entityManager.persist(user);
+        UserData user = new UserData(
+                login.toString(),
+                password.getHash()
+        );
 
+        entityManager.persist(user);
         return true;
     }
 }

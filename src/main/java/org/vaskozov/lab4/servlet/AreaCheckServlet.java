@@ -48,8 +48,12 @@ public class AreaCheckServlet extends HttpServlet {
                 requestParameters.getValue()
         );
 
+        if (!validationStorage.save(request.getParameter("login"), responseResult)) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
         response.setStatus(200 + (responseResult.isInArea() ? 0 : 1));
-        validationStorage.save(request.getParameter("login"), responseResult);
         gson.toJson(responseResult, response.getWriter());
     }
 

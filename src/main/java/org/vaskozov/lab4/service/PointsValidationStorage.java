@@ -3,7 +3,6 @@ package org.vaskozov.lab4.service;
 import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.vaskozov.lab4.bean.RequestResults;
 import org.vaskozov.lab4.bean.UserData;
@@ -31,19 +30,16 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
                 "SELECT u FROM RequestResults u WHERE u.userId = :userId",
                 RequestResults.class);
 
-        query.setParameter("userId", getUserIdByLogin(login));
-        return query.getResultList();
+
+        return query.setParameter("userId", getUserIdByLogin(login))
+                .getResultList();
     }
 
     @Override
-    public boolean removeAll(String login) {
-        Query query = entityManager.createQuery(
-                "DELETE RequestResults u WHERE u.userId = :userId");
-
-        query.setParameter("userId", getUserIdByLogin(login));
-        query.executeUpdate();
-
-        return true;
+    public void removeAll(String login) {
+        entityManager.createQuery("DELETE RequestResults u WHERE u.userId = :userId")
+                .setParameter("userId", getUserIdByLogin(login))
+                .executeUpdate();
     }
 
     private long getUserIdByLogin(String login) {
@@ -51,21 +47,22 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
                 "SELECT u FROM UserData u WHERE u.login = :login",
                 UserData.class);
 
-        query.setParameter("login", login);
-        return query.getSingleResult().getId();
+        return query.setParameter("login", login)
+                .getSingleResult()
+                .getId();
     }
 
     private void doSave(String login, RequestResults pointCheckResult) {
         long userId = getUserIdByLogin(login);
 
-        RequestResults requestResults = new RequestResults();
-
-        requestResults.setUserId(userId);
-        requestResults.setX(pointCheckResult.getX());
-        requestResults.setY(pointCheckResult.getY());
-        requestResults.setR(pointCheckResult.getR());
-        requestResults.setInArea(pointCheckResult.isInArea());
-        requestResults.setExecutionTimeNs(pointCheckResult.getExecutionTimeNs());
+        RequestResults requestResults = RequestResults.builderWithUserId()
+                .userId(userId)
+                .x(pointCheckResult.getX())
+                .y(pointCheckResult.getY())
+                .r(pointCheckResult.getR())
+                .inArea(pointCheckResult.isInArea())
+                .executionTimeNs(pointCheckResult.getExecutionTimeNs())
+                .build();
 
         entityManager.persist(requestResults);
     }

@@ -1,14 +1,12 @@
 package org.vaskozov.lab4.lib;
 
 import com.google.common.hash.Hashing;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class Password {
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
     private final String password;
-
-    private Password(String password) {
-        this.password = password;
-    }
 
     @Override
     public String toString() {

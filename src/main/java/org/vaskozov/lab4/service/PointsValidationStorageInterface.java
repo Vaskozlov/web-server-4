@@ -9,5 +9,5 @@ public interface PointsValidationStorageInterface {
 
     List<RequestResults> getAllValidations(String login);
 
-    boolean removeAll(String login);
+    void removeAll(String login);
 }

@@ -18,6 +18,7 @@ public class AuthorizationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
+        httpResponse.setContentType("text/plain;charset=UTF-8");
 
         final String loginStr = request.getParameter("login");
         final String passwordStr = request.getParameter("password");

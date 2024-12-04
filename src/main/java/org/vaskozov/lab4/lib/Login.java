@@ -1,13 +1,12 @@
 package org.vaskozov.lab4.lib;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class Login {
     private static final String LOGIN_REGEX = "^[a-zA-Z0-9]+$";
 
     private final String login;
-
-    private Login(String login) {
-        this.login = login;
-    }
 
     @Override
     public String toString() {
