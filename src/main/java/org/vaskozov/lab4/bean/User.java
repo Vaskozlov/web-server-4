@@ -10,8 +10,8 @@ import java.io.Serializable;
 @Table(name = "USERS")
 @Data
 @NoArgsConstructor
-public class UserData implements Serializable {
-    public UserData(String login, String password, String role) {
+public class User implements Serializable {
+    public User(String login, String password, String role) {
         this.login = login;
         this.password = password;
         this.role = role;

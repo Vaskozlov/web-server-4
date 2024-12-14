@@ -14,7 +14,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.vaskozov.lab4.bean.RequestResults;
+import org.vaskozov.lab4.bean.CheckResult;
 import org.vaskozov.lab4.lib.Result;
 import org.vaskozov.lab4.service.InAreaCheckerInterface;
 import org.vaskozov.lab4.service.PointsValidationStorageInterface;
@@ -54,7 +54,7 @@ public class AreaCheckServlet {
         long executionBeginNs = System.nanoTime();
         boolean isInArea = inAreaChecker.check(x, y, r);
 
-        RequestResults requestResult = new RequestResults(
+        CheckResult requestResult = new CheckResult(
                 x,
                 y,
                 r,

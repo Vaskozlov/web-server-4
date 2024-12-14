@@ -4,8 +4,8 @@ import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import org.vaskozov.lab4.bean.RequestResults;
-import org.vaskozov.lab4.bean.UserData;
+import org.vaskozov.lab4.bean.CheckResult;
+import org.vaskozov.lab4.bean.User;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
     private EntityManager entityManager;
 
     @Override
-    public boolean save(String login, RequestResults pointCheckResult) {
+    public boolean save(String login, CheckResult pointCheckResult) {
         try {
             doSave(login, pointCheckResult);
             return true;
@@ -25,10 +25,10 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
     }
 
     @Override
-    public List<RequestResults> getAllValidations(String login) {
-        TypedQuery<RequestResults> query = entityManager.createQuery(
-                "SELECT u FROM RequestResults u WHERE u.userId = :userId",
-                RequestResults.class);
+    public List<CheckResult> getAllValidations(String login) {
+        TypedQuery<CheckResult> query = entityManager.createQuery(
+                "SELECT u FROM CheckResult u WHERE u.userId = :userId",
+                CheckResult.class);
 
 
         return query.setParameter("userId", getUserIdByLogin(login))
@@ -37,25 +37,25 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
 
     @Override
     public void removeAll(String login) {
-        entityManager.createQuery("DELETE RequestResults u WHERE u.userId = :userId")
+        entityManager.createQuery("DELETE CheckResult u WHERE u.userId = :userId")
                 .setParameter("userId", getUserIdByLogin(login))
                 .executeUpdate();
     }
 
     private long getUserIdByLogin(String login) {
-        TypedQuery<UserData> query = entityManager.createQuery(
-                "SELECT u FROM UserData u WHERE u.login = :login",
-                UserData.class);
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.login = :login",
+                User.class);
 
         return query.setParameter("login", login)
                 .getSingleResult()
                 .getId();
     }
 
-    private void doSave(String login, RequestResults pointCheckResult) {
+    private void doSave(String login, CheckResult pointCheckResult) {
         long userId = getUserIdByLogin(login);
 
-        RequestResults requestResults = RequestResults.builderWithUserId()
+        CheckResult checkResult = CheckResult.builderWithUserId()
                 .userId(userId)
                 .x(pointCheckResult.getX())
                 .y(pointCheckResult.getY())
@@ -64,6 +64,6 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
                 .executionTimeNs(pointCheckResult.getExecutionTimeNs())
                 .build();
 
-        entityManager.persist(requestResults);
+        entityManager.persist(checkResult);
     }
 }

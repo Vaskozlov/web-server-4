@@ -7,8 +7,8 @@
     <persistence-unit name="lab4PU" >
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>java:/PostgresDS</jta-data-source>
-        <class>org.vaskozov.lab4.bean.UserData</class>
-        <class>org.vaskozov.lab4.bean.RequestResults</class>
+        <class>org.vaskozov.lab4.bean.User</class>
+        <class>org.vaskozov.lab4.bean.CheckResult</class>
         <properties>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>

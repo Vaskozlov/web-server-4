@@ -1,13 +1,13 @@
 package org.vaskozov.lab4.service;
 
-import org.vaskozov.lab4.bean.RequestResults;
+import org.vaskozov.lab4.bean.CheckResult;
 
 import java.util.List;
 
 public interface PointsValidationStorageInterface {
-    boolean save(String login, RequestResults pointCheckResult);
+    boolean save(String login, CheckResult pointCheckResult);
 
-    List<RequestResults> getAllValidations(String login);
+    List<CheckResult> getAllValidations(String login);
 
     void removeAll(String login);
 }

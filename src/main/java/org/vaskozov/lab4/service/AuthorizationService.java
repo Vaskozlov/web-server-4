@@ -4,7 +4,7 @@ import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import org.vaskozov.lab4.bean.UserData;
+import org.vaskozov.lab4.bean.User;
 import org.vaskozov.lab4.lib.JwtUtil;
 import org.vaskozov.lab4.lib.Login;
 import org.vaskozov.lab4.lib.Password;
@@ -18,13 +18,13 @@ public class AuthorizationService implements AuthorizationInterface {
     private EntityManager entityManager;
 
     @Override
-    public Result<UserData, String> authorize(Login login, Password password) {
-        TypedQuery<UserData> query = entityManager.createQuery(
-                "SELECT u FROM UserData u WHERE u.login = :login AND u.password = :password",
-                UserData.class
+    public Result<User, String> authorize(Login login, Password password) {
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.login = :login AND u.password = :password",
+                User.class
         );
 
-        List<UserData> resultList = query.setParameter("login", login.toString())
+        List<User> resultList = query.setParameter("login", login.toString())
                 .setParameter("password", password.getHash())
                 .getResultList();
 
@@ -34,10 +34,10 @@ public class AuthorizationService implements AuthorizationInterface {
     }
 
     @Override
-    public Result<UserData, String> register(Login login, Password password, String role) {
-        TypedQuery<UserData> query = entityManager.createQuery(
-                "SELECT u FROM UserData u WHERE u.login = :login",
-                UserData.class
+    public Result<User, String> register(Login login, Password password, String role) {
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.login = :login",
+                User.class
         );
 
         boolean hasUser = !query.setParameter("login", login.toString())
@@ -48,7 +48,7 @@ public class AuthorizationService implements AuthorizationInterface {
             return Result.error("User already exists");
         }
 
-        UserData user = new UserData(
+        User user = new User(
                 login.toString(),
                 password.getHash(),
                 role
@@ -59,7 +59,7 @@ public class AuthorizationService implements AuthorizationInterface {
     }
 
     @Override
-    public String createToken(UserData user) {
+    public String createToken(User user) {
         return JwtUtil.createToken(user.getLogin(), user.getRole());
     }
 

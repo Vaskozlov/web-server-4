@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "RESULTS")
+@Table(name = "CHECK_RESULTS")
 @Data
 @NoArgsConstructor
-public class RequestResults implements Serializable {
+public class CheckResult implements Serializable {
     @Builder
-    public RequestResults(double x, double y, double r, boolean inArea, long executionTimeNs) {
+    public CheckResult(double x, double y, double r, boolean inArea, long executionTimeNs) {
         this.x = x;
         this.y = y;
         this.r = r;
@@ -23,7 +23,7 @@ public class RequestResults implements Serializable {
     }
 
     @Builder(builderMethodName = "builderWithUserId", builderClassName = "BuilderWithUserId")
-    public RequestResults(long userId, double x, double y, double r, boolean inArea, long executionTimeNs) {
+    public CheckResult(long userId, double x, double y, double r, boolean inArea, long executionTimeNs) {
         this(x, y, r, inArea, executionTimeNs);
         this.userId = userId;
     }

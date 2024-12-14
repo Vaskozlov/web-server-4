@@ -11,7 +11,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.vaskozov.lab4.bean.UserData;
+import org.vaskozov.lab4.bean.User;
 import org.vaskozov.lab4.lib.*;
 import org.vaskozov.lab4.service.AuthorizationInterface;
 
@@ -36,7 +36,7 @@ public class AuthorizationServlet {
         Login login = authorizationInfo.getLogin();
         Password password = authorizationInfo.getPassword();
 
-        Result<UserData, String> loginResult = authorizationService.authorize(
+        Result<User, String> loginResult = authorizationService.authorize(
                 login,
                 password
         );
@@ -47,7 +47,7 @@ public class AuthorizationServlet {
                     .build();
         }
 
-        UserData user = loginResult.getValue();
+        User user = loginResult.getValue();
         return createResponseWithToken(user);
     }
 
@@ -55,7 +55,7 @@ public class AuthorizationServlet {
     @Produces(MediaType.APPLICATION_JSON)
     @PermitAll
     @Path("register")
-    public Response authenticate(@QueryParam("login") String qLogin, @QueryParam("password") String qPassword) {
+    public Response register(@QueryParam("login") String qLogin, @QueryParam("password") String qPassword) {
         Result<AuthorizationInfo, Response> validationResult = validateLoginAndPassword(qLogin, qPassword);
 
         if (validationResult.isError()) {
@@ -66,7 +66,7 @@ public class AuthorizationServlet {
         Login login = authorizationInfo.getLogin();
         Password password = authorizationInfo.getPassword();
 
-        Result<UserData, String> authorizationResult = authorizationService.register(login, password, "user");
+        Result<User, String> authorizationResult = authorizationService.register(login, password, "user");
 
         if (authorizationResult.isError()) {
             return Response.status(Response.Status.CONFLICT)
@@ -74,7 +74,7 @@ public class AuthorizationServlet {
                     .build();
         }
 
-        UserData user = authorizationResult.getValue();
+        User user = authorizationResult.getValue();
         return createResponseWithToken(user);
     }
 
@@ -109,7 +109,7 @@ public class AuthorizationServlet {
         return Result.success(new AuthorizationInfo(login.getValue(), password.getValue()));
     }
 
-    private Response createResponseWithToken(UserData user) {
+    private Response createResponseWithToken(User user) {
         String token = authorizationService.createToken(user);
 
         JsonObject json = Json.createObjectBuilder()

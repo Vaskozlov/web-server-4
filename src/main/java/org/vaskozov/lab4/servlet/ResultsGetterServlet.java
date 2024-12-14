@@ -12,7 +12,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.vaskozov.lab4.bean.RequestResults;
+import org.vaskozov.lab4.bean.CheckResult;
 import org.vaskozov.lab4.service.PointsValidationStorageInterface;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class ResultsGetterServlet {
     public Response getResults(@Context HttpServletRequest request) {
         String login = (String) request.getAttribute("login");
 
-        List<RequestResults> results = validationStorage.getAllValidations(login);
+        List<CheckResult> results = validationStorage.getAllValidations(login);
 
         if (results == null) {
             return Response
