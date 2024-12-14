@@ -10,7 +10,6 @@ repositories {
     mavenCentral()
 }
 
-val gsonVersion = "2.10.1"
 val jakartaServletVersion = "6.1.0"
 val jakartaEjbVersion = "4.0.1"
 val jakartaApiVersion = "10.0.0"
@@ -19,9 +18,9 @@ val postgresqlVersion = "42.7.4"
 val lombokVersion = "1.18.34"
 val guavaVersion = "33.3.1-jre"
 val jjwtVersion = "0.12.6"
+val jsonBindVersion = "3.0.1"
 
 dependencies {
-    implementation("com.google.code.gson:gson:${gsonVersion}")
     compileOnly("jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}")
     implementation("jakarta.ejb:jakarta.ejb-api:${jakartaEjbVersion}")
     implementation("org.postgresql:postgresql:${postgresqlVersion}")
@@ -33,4 +32,5 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
+    implementation("jakarta.json.bind:jakarta.json.bind-api:${jsonBindVersion}")
 }

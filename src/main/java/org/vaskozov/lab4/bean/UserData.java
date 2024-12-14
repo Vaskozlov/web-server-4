@@ -11,9 +11,10 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 public class UserData implements Serializable {
-    public UserData(String login, String password) {
+    public UserData(String login, String password, String role) {
         this.login = login;
         this.password = password;
+        this.role = role;
     }
 
     @Id
@@ -23,6 +24,7 @@ public class UserData implements Serializable {
     @Column(name = "login", unique = true)
     private String login;
 
-    @Column(name = "password")
     private String password;
+
+    private String role;
 }

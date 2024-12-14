@@ -18,7 +18,7 @@ public class Result<V, E> {
     }
 
     public boolean isSuccess() {
-        return value != null;
+        return value != null || error == null;
     }
 
     public boolean isError() {

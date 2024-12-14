@@ -5,8 +5,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import org.vaskozov.lab4.bean.UserData;
+import org.vaskozov.lab4.lib.JwtUtil;
 import org.vaskozov.lab4.lib.Login;
 import org.vaskozov.lab4.lib.Password;
+import org.vaskozov.lab4.lib.Result;
+
+import java.util.List;
 
 @Singleton
 public class AuthorizationService implements AuthorizationInterface {
@@ -14,20 +18,23 @@ public class AuthorizationService implements AuthorizationInterface {
     private EntityManager entityManager;
 
     @Override
-    public boolean authorize(Login login, Password password) {
+    public Result<UserData, String> authorize(Login login, Password password) {
         TypedQuery<UserData> query = entityManager.createQuery(
                 "SELECT u FROM UserData u WHERE u.login = :login AND u.password = :password",
                 UserData.class
         );
 
-        return !query.setParameter("login", login.toString())
+        List<UserData> resultList = query.setParameter("login", login.toString())
                 .setParameter("password", password.getHash())
-                .getResultList()
-                .isEmpty();
+                .getResultList();
+
+        return resultList.isEmpty()
+                ? Result.error("Invalid login or password")
+                : Result.success(resultList.get(0));
     }
 
     @Override
-    public boolean register(Login login, Password password) {
+    public Result<UserData, String> register(Login login, Password password, String role) {
         TypedQuery<UserData> query = entityManager.createQuery(
                 "SELECT u FROM UserData u WHERE u.login = :login",
                 UserData.class
@@ -38,15 +45,26 @@ public class AuthorizationService implements AuthorizationInterface {
                 .isEmpty();
 
         if (hasUser) {
-            return false;
+            return Result.error("User already exists");
         }
 
         UserData user = new UserData(
                 login.toString(),
-                password.getHash()
+                password.getHash(),
+                role
         );
 
         entityManager.persist(user);
-        return true;
+        return Result.success(user);
+    }
+
+    @Override
+    public String createToken(UserData user) {
+        return JwtUtil.createToken(user.getLogin(), user.getRole());
+    }
+
+    @Override
+    public Result<String, Exception> validateToken(String token) {
+        return JwtUtil.validateToken(token);
     }
 }

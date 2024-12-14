@@ -3,50 +3,44 @@ package org.vaskozov.lab4.filters;
 import jakarta.ejb.EJB;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.vaskozov.lab4.lib.Login;
-import org.vaskozov.lab4.lib.Password;
+import org.vaskozov.lab4.lib.Result;
 import org.vaskozov.lab4.service.AuthorizationInterface;
 
 import java.io.IOException;
 
-@WebFilter(urlPatterns = {"/check", "/validations_results"}, asyncSupported = true)
+@WebFilter(urlPatterns = {"/api/check", "/api/get_results", "/api/delete_results"}, asyncSupported = true)
 public class AuthorizationFilter implements Filter {
     @EJB(name = "java:global/lab4/AuthorizationService")
     private AuthorizationInterface authorizationService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-        httpResponse.setContentType("text/plain;charset=UTF-8");
+        String authHeader = httpRequest.getHeader("Authorization");
 
-        final String loginStr = request.getParameter("login");
-        final String passwordStr = request.getParameter("password");
-
-        if (loginStr == null || passwordStr == null) {
-            unauthorizedError(httpResponse);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            unauthorizedError(httpResponse, "Authorization header is missing or invalid");
             return;
         }
 
-        final var login = Login.of(loginStr);
-        final var password = Password.of(passwordStr);
+        String token = authHeader.substring(7);
+        Result<String, Exception> validationResult = authorizationService.validateToken(token);
 
-        if (login.isError() || password.isError()) {
-            unauthorizedError(httpResponse);
+        if (validationResult.isError()) {
+            unauthorizedError(httpResponse, validationResult.getError().getMessage());
             return;
         }
 
-        if (!authorizationService.authorize(login.getValue(), password.getValue())) {
-            response.getWriter().println("Invalid login or password");
-            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
+        request.setAttribute("login", validationResult.getValue());
+        System.out.println("login: " + validationResult.getValue());
         chain.doFilter(request, response);
     }
 
-    private void unauthorizedError(HttpServletResponse response) throws IOException {
-        response.getWriter().println("Unauthorized");
+    private void unauthorizedError(HttpServletResponse response, String reason) throws IOException {
+        response.getWriter().println(reason);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }
