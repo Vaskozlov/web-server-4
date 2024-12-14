@@ -10,7 +10,7 @@ import org.vaskozov.lab4.service.AuthorizationInterface;
 
 import java.io.IOException;
 
-@WebFilter(urlPatterns = {"/api/check", "/api/get_results", "/api/delete_results"}, asyncSupported = true)
+@WebFilter(urlPatterns = {"/api/user/*"}, asyncSupported = true)
 public class AuthorizationFilter implements Filter {
     @EJB(name = "java:global/lab4/AuthorizationService")
     private AuthorizationInterface authorizationService;

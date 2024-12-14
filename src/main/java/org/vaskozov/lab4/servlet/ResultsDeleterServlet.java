@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.Response;
 import org.vaskozov.lab4.service.PointsValidationStorageInterface;
 
 @ApplicationScoped
-@Path("delete_results")
+@Path("user/delete_results")
 public class ResultsDeleterServlet {
     @EJB(name = "java:global/lab4/PointsValidationStorage")
     private PointsValidationStorageInterface validationStorage;

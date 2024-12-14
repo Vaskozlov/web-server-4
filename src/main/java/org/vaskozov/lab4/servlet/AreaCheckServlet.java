@@ -20,7 +20,7 @@ import org.vaskozov.lab4.service.InAreaCheckerInterface;
 import org.vaskozov.lab4.service.PointsValidationStorageInterface;
 
 @ApplicationScoped
-@Path("check")
+@Path("user/check")
 public class AreaCheckServlet {
     private static final JsonbConfig JSONB_CONFIG = new JsonbConfig().withFormatting(true);
     private static final Jsonb JSONB = JsonbBuilder.create(JSONB_CONFIG);

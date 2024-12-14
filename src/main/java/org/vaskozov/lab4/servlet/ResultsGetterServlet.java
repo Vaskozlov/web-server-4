@@ -18,7 +18,7 @@ import org.vaskozov.lab4.service.PointsValidationStorageInterface;
 import java.util.List;
 
 @ApplicationScoped
-@Path("get_results")
+@Path("user/get_results")
 public class ResultsGetterServlet {
     private static final JsonbConfig JSONB_CONFIG = new JsonbConfig().withFormatting(true);
     private static final Jsonb JSONB = JsonbBuilder.create(JSONB_CONFIG);
