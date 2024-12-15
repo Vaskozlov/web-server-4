@@ -10,9 +10,9 @@ import org.vaskozov.lab4.bean.User;
 import java.util.List;
 
 @Singleton
-public class PointsValidationStorage implements PointsValidationStorageInterface {
+public class ResultsStorage implements ResultsStorageInterface {
     @PersistenceContext(name = "lab4PU")
-    private EntityManager entityManager;
+    private EntityManager database;
 
     @Override
     public boolean save(String login, CheckResult pointCheckResult) {
@@ -25,38 +25,38 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
     }
 
     @Override
-    public List<CheckResult> getAllValidations(String login) {
-        TypedQuery<CheckResult> query = entityManager.createQuery(
+    public List<CheckResult> getAllResults(String login) {
+        TypedQuery<CheckResult> query = database.createQuery(
                 "SELECT u FROM CheckResult u WHERE u.userId = :userId",
                 CheckResult.class);
 
 
-        return query.setParameter("userId", getUserIdByLogin(login))
+        return query.setParameter("userId", getUserId(login))
                 .getResultList();
     }
 
     @Override
     public void removeAll(String login) {
-        entityManager.createQuery("DELETE CheckResult u WHERE u.userId = :userId")
-                .setParameter("userId", getUserIdByLogin(login))
+        database.createQuery("DELETE CheckResult u WHERE u.userId = :userId")
+                .setParameter("userId", getUserId(login))
                 .executeUpdate();
     }
 
-    private long getUserIdByLogin(String login) {
-        TypedQuery<User> query = entityManager.createQuery(
+    private long getUserId(String login) {
+        TypedQuery<User> query = database.createQuery(
                 "SELECT u FROM User u WHERE u.login = :login",
                 User.class);
 
-        return query.setParameter("login", login)
+        return query
+                .setParameter("login", login)
                 .getSingleResult()
                 .getId();
     }
 
     private void doSave(String login, CheckResult pointCheckResult) {
-        long userId = getUserIdByLogin(login);
-
-        CheckResult checkResult = CheckResult.builderWithUserId()
-                .userId(userId)
+        CheckResult checkResult = CheckResult
+                .builderWithUserId()
+                .userId(getUserId(login))
                 .x(pointCheckResult.getX())
                 .y(pointCheckResult.getY())
                 .r(pointCheckResult.getR())
@@ -64,6 +64,6 @@ public class PointsValidationStorage implements PointsValidationStorageInterface
                 .executionTimeNs(pointCheckResult.getExecutionTimeNs())
                 .build();
 
-        entityManager.persist(checkResult);
+        database.persist(checkResult);
     }
 }

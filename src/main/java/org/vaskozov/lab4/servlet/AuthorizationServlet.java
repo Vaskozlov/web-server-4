@@ -13,47 +13,33 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.vaskozov.lab4.bean.User;
 import org.vaskozov.lab4.lib.*;
-import org.vaskozov.lab4.service.AuthorizationInterface;
+import org.vaskozov.lab4.service.UserAuthorizationInterface;
 
 @ApplicationScoped
 @Path("auth")
+@PermitAll
 public class AuthorizationServlet {
-    @EJB(name = "java:global/lab4/AuthorizationService")
-    private AuthorizationInterface authorizationService;
+    @EJB(name = "java:global/lab4/UserAuthorizer")
+    private UserAuthorizationInterface userAuthorizer;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @PermitAll
     @Path("login")
     public Response login(@QueryParam("login") String qLogin, @QueryParam("password") String qPassword) {
-        Result<AuthorizationInfo, Response> validationResult = validateLoginAndPassword(qLogin, qPassword);
-
-        if (validationResult.isError()) {
-            return validationResult.getError();
-        }
-
-        AuthorizationInfo authorizationInfo = validationResult.getValue();
-        Login login = authorizationInfo.getLogin();
-        Password password = authorizationInfo.getPassword();
-
-        Result<User, String> loginResult = authorizationService.authorize(
-                login,
-                password
+        Result<User, String> loginResult = userAuthorizer.authorize(
+                Login.of(qLogin, true),
+                Password.of(qPassword, true)
         );
 
         if (loginResult.isError()) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(loginResult.getError())
-                    .build();
+            return createErrorResponse(loginResult.getError(), Response.Status.UNAUTHORIZED);
         }
 
-        User user = loginResult.getValue();
-        return createResponseWithToken(user);
+        return createTokenResponse(loginResult.getValue());
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @PermitAll
     @Path("register")
     public Response register(@QueryParam("login") String qLogin, @QueryParam("password") String qPassword) {
         Result<AuthorizationInfo, Response> validationResult = validateLoginAndPassword(qLogin, qPassword);
@@ -63,64 +49,90 @@ public class AuthorizationServlet {
         }
 
         AuthorizationInfo authorizationInfo = validationResult.getValue();
-        Login login = authorizationInfo.getLogin();
-        Password password = authorizationInfo.getPassword();
 
-        Result<User, String> authorizationResult = authorizationService.register(login, password, "user");
+        Result<User, String> authorizationResult = userAuthorizer.register(
+                authorizationInfo.getLogin(),
+                authorizationInfo.getPassword(),
+                "user"
+        );
 
         if (authorizationResult.isError()) {
-            return Response.status(Response.Status.CONFLICT)
+            return Response
+                    .status(Response.Status.CONFLICT)
                     .entity(authorizationResult.getError())
                     .build();
         }
 
-        User user = authorizationResult.getValue();
-        return createResponseWithToken(user);
+        return createTokenResponse(authorizationResult.getValue());
+    }
+
+    private static Response createErrorResponse(String message, Response.Status status) {
+        return Response
+                .status(status)
+                .entity(message)
+                .build();
     }
 
     private Result<AuthorizationInfo, Response> validateLoginAndPassword(String qLogin, String qPassword) {
         if (qLogin == null || qPassword == null) {
-            return Result.error(
-                    Response.status(Response.Status.BAD_REQUEST)
-                            .entity("Login and password must be provided")
-                            .build()
-            );
+            return Result.error(createErrorResponse("Login and password must be provided", Response.Status.BAD_REQUEST));
         }
 
         Result<Login, AuthorizationInfoError> login = Login.of(qLogin);
         Result<Password, AuthorizationInfoError> password = Password.of(qPassword);
 
         if (login.isError()) {
-            return Result.error(
-                    Response.status(Response.Status.BAD_REQUEST)
-                            .entity(login.getError())
-                            .build()
-            );
+            return Result.error(createInvalidLoginResponse(login.getError()));
         }
 
         if (password.isError()) {
-            return Result.error(
-                    Response.status(Response.Status.BAD_REQUEST)
-                            .entity(password.getError())
-                            .build()
-            );
+            return Result.error(createInvalidPasswordResponse(password.getError()));
         }
 
         return Result.success(new AuthorizationInfo(login.getValue(), password.getValue()));
     }
 
-    private Response createResponseWithToken(User user) {
-        String token = authorizationService.createToken(user);
+    private Response createTokenResponse(User user) {
+        String token = userAuthorizer.createToken(user);
 
-        JsonObject json = Json.createObjectBuilder()
+        JsonObject json = Json
+                .createObjectBuilder()
                 .add("token_type", "bearer")
                 .add("role", user.getRole())
                 .build();
 
-        return Response.ok(json)
+        return Response
+                .ok(json)
                 .header("Cache-Control", "no-store")
                 .header("Pragma", "no-cache")
                 .header("Authorization", "Bearer " + token)
+                .header("Access-Control-Expose-Headers", "Authorization")
                 .build();
+    }
+
+    private static Response createInvalidLoginResponse(AuthorizationInfoError error) {
+        switch (error) {
+            case TOO_SHORT -> {
+                return createErrorResponse("Login is too short", Response.Status.BAD_REQUEST);
+            }
+            case INVALID_CHARACTER -> {
+                return createErrorResponse("Login contains invalid characters", Response.Status.BAD_REQUEST);
+            }
+        }
+
+        throw new IllegalStateException();
+    }
+
+    private static Response createInvalidPasswordResponse(AuthorizationInfoError error) {
+        switch (error) {
+            case TOO_SHORT -> {
+                return createErrorResponse("Password is too short", Response.Status.BAD_REQUEST);
+            }
+            case INVALID_CHARACTER -> {
+                return createErrorResponse("Password contains invalid characters", Response.Status.BAD_REQUEST);
+            }
+        }
+
+        throw new IllegalStateException();
     }
 }

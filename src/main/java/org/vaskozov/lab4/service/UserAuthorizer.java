@@ -5,21 +5,18 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import org.vaskozov.lab4.bean.User;
-import org.vaskozov.lab4.lib.JwtUtil;
-import org.vaskozov.lab4.lib.Login;
-import org.vaskozov.lab4.lib.Password;
-import org.vaskozov.lab4.lib.Result;
+import org.vaskozov.lab4.lib.*;
 
 import java.util.List;
 
 @Singleton
-public class AuthorizationService implements AuthorizationInterface {
+public class UserAuthorizer implements UserAuthorizationInterface {
     @PersistenceContext(name = "lab4PU")
-    private EntityManager entityManager;
+    private EntityManager database;
 
     @Override
     public Result<User, String> authorize(Login login, Password password) {
-        TypedQuery<User> query = entityManager.createQuery(
+        TypedQuery<User> query = database.createQuery(
                 "SELECT u FROM User u WHERE u.login = :login AND u.password = :password",
                 User.class
         );
@@ -35,7 +32,7 @@ public class AuthorizationService implements AuthorizationInterface {
 
     @Override
     public Result<User, String> register(Login login, Password password, String role) {
-        TypedQuery<User> query = entityManager.createQuery(
+        TypedQuery<User> query = database.createQuery(
                 "SELECT u FROM User u WHERE u.login = :login",
                 User.class
         );
@@ -54,7 +51,7 @@ public class AuthorizationService implements AuthorizationInterface {
                 role
         );
 
-        entityManager.persist(user);
+        database.persist(user);
         return Result.success(user);
     }
 
@@ -64,7 +61,7 @@ public class AuthorizationService implements AuthorizationInterface {
     }
 
     @Override
-    public Result<String, Exception> validateToken(String token) {
+    public Result<String, JwtError> validateToken(String token) {
         return JwtUtil.validateToken(token);
     }
 }

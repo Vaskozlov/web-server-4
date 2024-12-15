@@ -6,11 +6,11 @@ import lombok.AllArgsConstructor;
 public class Login {
     private static final String LOGIN_REGEX = "^[a-zA-Z0-9]+$";
 
-    private final String login;
+    private final String loginRepresentation;
 
     @Override
     public String toString() {
-        return login;
+        return loginRepresentation;
     }
 
     public static Result<Login, AuthorizationInfoError> of(String login) {
@@ -23,5 +23,13 @@ public class Login {
         }
 
         return Result.success(new Login(login));
+    }
+
+    public static Login of(String login, boolean ignoreValidation) {
+        if (ignoreValidation) {
+            return new Login(login);
+        }
+
+        return of(login).getValue();
     }
 }

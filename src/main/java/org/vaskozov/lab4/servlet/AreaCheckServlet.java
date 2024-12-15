@@ -17,44 +17,43 @@ import jakarta.ws.rs.core.Response;
 import org.vaskozov.lab4.bean.CheckResult;
 import org.vaskozov.lab4.lib.Result;
 import org.vaskozov.lab4.service.InAreaCheckerInterface;
-import org.vaskozov.lab4.service.PointsValidationStorageInterface;
+import org.vaskozov.lab4.service.ResultsStorageInterface;
 
 @ApplicationScoped
 @Path("user/check")
+@PermitAll
 public class AreaCheckServlet {
     private static final JsonbConfig JSONB_CONFIG = new JsonbConfig().withFormatting(true);
     private static final Jsonb JSONB = JsonbBuilder.create(JSONB_CONFIG);
 
-    @EJB(name = "java:global/lab4/PointsValidationStorage")
-    private PointsValidationStorageInterface validationStorage;
+    @EJB(name = "java:global/lab4/ResultsStorage")
+    private ResultsStorageInterface resultsStorage;
 
     @EJB(name = "java:global/lab4/InAreaChecker")
     private InAreaCheckerInterface inAreaChecker;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @PermitAll
     public Response check(
             @QueryParam("x") double x,
             @QueryParam("y") double y,
             @QueryParam("r") double r,
             @Context HttpServletRequest request
     ) {
-        Result<Void, String> validationResult = validateParameters(x, y, r);
+        long executionBeginNs = System.nanoTime();
+        Result<Void, String> validatedParameters = validateParameters(x, y, r);
 
-        if (validationResult.isError()) {
+        if (validatedParameters.isError()) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
-                    .entity(validationResult.getError())
+                    .entity(validatedParameters.getError())
                     .build();
         }
 
-
         String login = (String) request.getAttribute("login");
-        long executionBeginNs = System.nanoTime();
         boolean isInArea = inAreaChecker.check(x, y, r);
 
-        CheckResult requestResult = new CheckResult(
+        CheckResult checkResult = new CheckResult(
                 x,
                 y,
                 r,
@@ -62,15 +61,14 @@ public class AreaCheckServlet {
                 System.nanoTime() - executionBeginNs
         );
 
-
-        if (!validationStorage.save(login, requestResult)) {
+        if (!resultsStorage.save(login, checkResult)) {
             return Response
                     .status(Response.Status.INTERNAL_SERVER_ERROR)
                     .build();
         }
 
         return Response
-                .ok(JSONB.toJson(requestResult))
+                .ok(JSONB.toJson(checkResult))
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .build();
     }
@@ -80,7 +78,11 @@ public class AreaCheckServlet {
             return Result.error("Parameters must be numbers");
         }
 
-        if (r <= 0) {
+        if (Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(r)) {
+            return Result.error("Parameters must be finite numbers");
+        }
+
+        if (r <= 0.0) {
             return Result.error("R must be greater than 0");
         }
 

@@ -6,31 +6,41 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Password {
     private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-    private final String password;
+    private static final String SALT = "1492@@#a!";
+
+    private final String passwordRepresentation;
 
     @Override
     public String toString() {
-        return password;
+        return passwordRepresentation;
     }
 
     public String getHash() {
         return Hashing.sha384()
                 .hashString(
-                        "1492@@#a!" + password,
+                        SALT + passwordRepresentation,
                         java.nio.charset.StandardCharsets.UTF_8
                 )
                 .toString();
     }
 
-    public static Result<Password, AuthorizationInfoError> of(String login) {
-        if (login.length() < 8) {
+    public static Result<Password, AuthorizationInfoError> of(String password) {
+        if (password.length() < 8) {
             return Result.error(AuthorizationInfoError.TOO_SHORT);
         }
 
-        if (!login.matches(PASSWORD_REGEX)) {
+        if (!password.matches(PASSWORD_REGEX)) {
             return Result.error(AuthorizationInfoError.INVALID_CHARACTER);
         }
 
-        return Result.success(new Password(login));
+        return Result.success(new Password(password));
+    }
+
+    public static Password of(String password, boolean ignoreValidation) {
+        if (ignoreValidation) {
+            return new Password(password);
+        }
+
+        return of(password).getValue();
     }
 }
