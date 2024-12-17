@@ -53,17 +53,8 @@ public class ResultsStorage implements ResultsStorageInterface {
                 .getId();
     }
 
-    private void doSave(String login, CheckResult pointCheckResult) {
-        CheckResult checkResult = CheckResult
-                .builderWithUserId()
-                .userId(getUserId(login))
-                .x(pointCheckResult.getX())
-                .y(pointCheckResult.getY())
-                .r(pointCheckResult.getR())
-                .inArea(pointCheckResult.isInArea())
-                .executionTimeNs(pointCheckResult.getExecutionTimeNs())
-                .build();
-
+    private void doSave(String login, CheckResult checkResult) {
+        checkResult.setUserId(getUserId(login));
         database.persist(checkResult);
     }
 }

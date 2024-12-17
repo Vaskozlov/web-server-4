@@ -11,6 +11,7 @@ import java.util.Date;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 public class JwtUtil {
+    // Do not save your secret key in the source code in real projects
     private static final byte[] JWT_SECRET = Base64.getDecoder().decode("5d2f6d1f8065fbedbbc0a0ec047704ddc8054c3c42a92fc7b3c2cbc68df2a868");
     private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(JWT_SECRET);
 
